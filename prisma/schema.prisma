@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -13,15 +7,21 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String?
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String?
+  name          String?
+  image         String?
+  emailVerified Boolean  @default(false)
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
+  products Product[]
 
-  products  Product[]
+  @@map("user")
 }
 
 model Session {
@@ -30,7 +30,16 @@ model Session {
   token     String   @unique
   expiresAt DateTime
 
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("session")
 }
 
 model Account {
@@ -39,15 +48,56 @@ model Account {
   provider          String
   providerAccountId String
 
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("account")
 }
 
 model Product {
-  id      String @id @default(uuid())
-  name    String
-  type    String
-  brand   String?
-  userId  String
+  id     String  @id @default(uuid())
+  name   String
+  type   String
+  brand  String?
+  userId String
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([identifier, value])
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Jwks {
+  id         String    @id
+  publicKey  String
+  privateKey String
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+
+  @@map("jwks")
 }
