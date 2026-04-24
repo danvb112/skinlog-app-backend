@@ -7,7 +7,6 @@ export class UserController {
 
   @Post()
   create(@Req() req, @Body() body) {
-    console.log('Request POST User ID:', req);
     return this.service.create(body);
   }
 
