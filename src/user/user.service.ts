@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { uuidv7 } from 'uuidv7';
 import { User } from './types.js';
 
 @Injectable()
@@ -21,7 +22,7 @@ export class UserService {
 
     const newUser = {
       ...data,
-      id: '1234',
+      id: uuidv7(),
     };
 
     return this.prisma.user.create({
